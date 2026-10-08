@@ -25,17 +25,21 @@ public class DataInitializer implements CommandLineRunner {
         // Ensure core users exist
         initializeUsers();
 
-        // Check if full catalog is already seeded
-        if (productRepository.count() >= 150) {
+        // Check if catalog is already seeded
+        if (productRepository.count() > 0) {
             System.out.println("=== E-Commerce catalog already seeded with " + productRepository.count() + " products ===");
             return;
         }
 
         System.out.println("=== Seeding premium e-commerce catalog with 150 realistic products ===");
         
-        // Clear any old/default products and categories to prevent conflicts/duplicates
-        productRepository.deleteAll();
-        categoryRepository.deleteAll();
+        try {
+            // Clear any old/default products and categories to prevent conflicts/duplicates
+            productRepository.deleteAll();
+            categoryRepository.deleteAll();
+        } catch (Exception e) {
+            // Ignore if foreign key constraint exists from carts/orders
+        }
 
         // 11 Categories
         Category electronics = categoryRepository.save(Category.builder()
