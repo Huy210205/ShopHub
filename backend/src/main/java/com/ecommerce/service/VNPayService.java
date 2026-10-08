@@ -70,9 +70,9 @@ public class VNPayService {
         // Build query string & tính hash
         StringBuilder queryBuilder = new StringBuilder();
         for (Map.Entry<String, String> entry : vnpParams.entrySet()) {
-            queryBuilder.append(URLEncoder.encode(entry.getKey(), StandardCharsets.US_ASCII))
+            queryBuilder.append(urlEncode(entry.getKey()))
                     .append("=")
-                    .append(URLEncoder.encode(entry.getValue(), StandardCharsets.US_ASCII))
+                    .append(urlEncode(entry.getValue()))
                     .append("&");
         }
         String queryString = queryBuilder.toString();
@@ -96,14 +96,23 @@ public class VNPayService {
 
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, String> e : sorted.entrySet()) {
-            sb.append(URLEncoder.encode(e.getKey(), StandardCharsets.US_ASCII))
+            sb.append(urlEncode(e.getKey()))
               .append("=")
-              .append(URLEncoder.encode(e.getValue(), StandardCharsets.US_ASCII))
+              .append(urlEncode(e.getValue()))
               .append("&");
         }
         String hashData = sb.substring(0, sb.length() - 1);
         String calculatedHash = hmacSHA512(hashSecret, hashData);
         return calculatedHash.equalsIgnoreCase(vnpSecureHash);
+    }
+
+    private String urlEncode(String value) {
+        if (value == null) return "";
+        try {
+            return URLEncoder.encode(value, StandardCharsets.US_ASCII.toString());
+        } catch (Exception e) {
+            return value;
+        }
     }
 
     /**
