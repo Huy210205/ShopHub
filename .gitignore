@@ -1,0 +1,32 @@
+# ========================
+# Tài liệu nội bộ (không push lên GitHub)
+# ========================
+CHANGELOG.md
+
+# ========================
+# Docker
+# ========================
+docker-compose.override.yml
+
+# ========================
+# Environment / Secrets
+# ========================
+.env
+.env.local
+*.env
+
+# ========================
+# OS
+# ========================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ========================
+# IDE
+# ========================
+.idea/
+*.iml
+.vscode/
+*.suo
+*.user
