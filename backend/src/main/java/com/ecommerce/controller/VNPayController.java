@@ -35,7 +35,8 @@ public class VNPayController {
             HttpServletRequest request) {
 
         String ipAddr = getClientIp(request);
-        String orderInfo = "Thanh toan don hang #" + orderId;
+        String orderInfo = "Thanh toan don hang " + orderId;
+        log.info("Request create VNPay URL: orderId={}, amount={}, ipAddr={}, orderInfo={}", orderId, amount, ipAddr, orderInfo);
         String paymentUrl = vnPayService.createPaymentUrl(orderId, amount, orderInfo, ipAddr);
 
         Map<String, String> result = new HashMap<>();
