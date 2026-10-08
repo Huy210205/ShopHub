@@ -44,6 +44,26 @@ export default function Checkout() {
     if (!shippingAddress) { toast.error('Select or add an address'); return }
     setLoading(true)
     try {
+      // Đặt hàng với phương thức VNPAY
+      if (payment.method === 'VNPAY') {
+        let paymentMethod = 'VNPAY'
+        const orderRes = await api.post('/orders', {
+          shippingAddress,
+          paymentMethod,
+        })
+        const order = orderRes.data?.data
+        // Tạo URL thanh toán VNPay
+        const vnpRes = await api.post(`/vnpay/create-payment?orderId=${order.id}&amount=${order.totalAmount}`)
+        const paymentUrl = vnpRes.data?.data?.paymentUrl
+        if (paymentUrl) {
+          window.location.href = paymentUrl
+        } else {
+          toast.error('Không thể tạo URL thanh toán VNPay')
+        }
+        return
+      }
+
+      // Các phương thức thanh toán khác
       let paymentMethod = 'CREDIT_CARD'
       if (payment.method === 'UPI') paymentMethod = 'UPI'
       else if (payment.method === 'COD') paymentMethod = 'CASH_ON_DELIVERY'
@@ -122,14 +142,18 @@ export default function Checkout() {
             <div className="card p-6 space-y-4">
               <h2 className="font-bold">Payment Method</h2>
               {[
+                { id: 'VNPAY', label: '💳 Thanh toán VNPay', badge: 'Khuyến nghị' },
                 { id: 'UPI', label: 'Pay with UPI' },
                 { id: 'CARD', label: 'Pay with Card' },
                 { id: 'NET_BANKING', label: 'Net Banking' },
                 { id: 'COD', label: 'Cash on Delivery' },
               ].map((m) => (
-                <label key={m.id} className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer dark:border-gray-600">
+                <label key={m.id} className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer dark:border-gray-600 ${
+                  payment.method === m.id ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : ''
+                }`}>
                   <input type="radio" checked={payment.method === m.id} onChange={() => setPayment({ ...payment, method: m.id })} />
-                  {m.label}
+                  <span className="flex-1">{m.label}</span>
+                  {m.badge && <span className="text-xs bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400 px-2 py-0.5 rounded-full">{m.badge}</span>}
                 </label>
               ))}
               {payment.method === 'UPI' && (

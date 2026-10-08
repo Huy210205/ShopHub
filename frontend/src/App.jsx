@@ -16,6 +16,7 @@ import Contact from './pages/Contact'
 import FAQ from './pages/FAQ'
 import Support from './pages/Support'
 import AdminDashboard from './pages/AdminDashboard'
+import VNPayReturn from './pages/VNPayReturn'
 
 export default function App() {
   const location = useLocation()
@@ -41,6 +42,7 @@ export default function App() {
           <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/admin/*" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/vnpay/return" element={<VNPayReturn />} />
         </Routes>
       </main>
       {!isAdminPath && (

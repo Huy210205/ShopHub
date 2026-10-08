@@ -16,6 +16,7 @@ import com.ecommerce.repository.PaymentRepository;
 import com.ecommerce.repository.UserRepository;
 import com.ecommerce.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderService {
@@ -133,6 +135,30 @@ public class OrderService {
         return mapper.toOrderResponse(orderRepository.save(order));
     }
 
+    /**
+     * Cập nhật trạng thái thanh toán sau callback VNPay
+     */
+    @Transactional
+    public void updateVNPayPayment(Long orderId, PaymentStatus status, String transactionNo) {
+        Order order = findOrder(orderId);
+        Payment payment = order.getPayment();
+        if (payment == null) {
+            log.warn("No payment found for order {}", orderId);
+            return;
+        }
+        payment.setPaymentStatus(status);
+        payment.setTransactionId(transactionNo);
+        if (status == PaymentStatus.COMPLETED) {
+            order.setStatus(OrderStatus.PROCESSING);
+        } else {
+            order.setStatus(OrderStatus.CANCELLED);
+            restoreStock(order);
+        }
+        orderRepository.save(order);
+        paymentRepository.save(payment);
+        log.info("VNPay payment updated: orderId={}, status={}, txnNo={}", orderId, status, transactionNo);
+    }
+
     private Payment processPayment(Order order, PlaceOrderRequest request) {
         PaymentStatus status;
         String transactionId = null;
@@ -155,6 +181,11 @@ public class OrderService {
             case CASH_ON_DELIVERY:
                 status = PaymentStatus.PENDING;
                 transactionId = "COD-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+                break;
+            case VNPAY:
+                // VNPay: tạo payment với trạng thái PENDING, sẽ được cập nhật qua callback
+                status = PaymentStatus.PENDING;
+                transactionId = "VNPAY-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
                 break;
             default:
                 throw new BadRequestException("Invalid payment method");
