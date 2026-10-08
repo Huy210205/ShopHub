@@ -153,7 +153,7 @@ public class VNPayService {
     private String urlEncode(String value) {
         if (value == null) return "";
         try {
-            return URLEncoder.encode(value, StandardCharsets.US_ASCII.toString());
+            return URLEncoder.encode(value, StandardCharsets.UTF_8.toString());
         } catch (Exception e) {
             return value;
         }
