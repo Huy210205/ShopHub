@@ -1,4 +1,4 @@
-# ShopHub E-Commerce
+# gearshop-store
 
 Full-stack e-commerce web app built with React + Spring Boot + MySQL + Redis.
 
