@@ -47,10 +47,14 @@ public class VNPayService {
         long vnpAmount = amount.multiply(BigDecimal.valueOf(100)).longValue();
         String vnpTxnRef = orderId + "_" + System.currentTimeMillis();
 
-        String createDate = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+        TimeZone vnTimeZone = TimeZone.getTimeZone("Asia/Ho_Chi_Minh");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+        sdf.setTimeZone(vnTimeZone);
+
+        Calendar cal = Calendar.getInstance(vnTimeZone);
+        String createDate = sdf.format(cal.getTime());
         cal.add(Calendar.MINUTE, 15);
-        String expireDate = new SimpleDateFormat("yyyyMMddHHmmss").format(cal.getTime());
+        String expireDate = sdf.format(cal.getTime());
 
         Map<String, String> vnpParams = new TreeMap<>();
         vnpParams.put("vnp_Version", vnpVersion);
